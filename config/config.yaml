@@ -1,0 +1,11 @@
+{
+  "bitcoin": {
+    "rpc_url": "http://127.0.0.1:8332",
+    "rpc_user": "user",
+    "rpc_password": "password"
+  },
+  "torram": {
+    "grpc_url": "127.0.0.1:50051"
+  },
+  "poll_interval_seconds": 10
+}
