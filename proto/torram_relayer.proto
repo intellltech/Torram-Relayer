@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package torram_relayer;
+
+// Service definition for Torram-Relayer communication.
+service TorramRelayerService {
+  // Streams events from Torram to the relayer.
+  rpc StreamTorramEvents(StreamEventsRequest) returns (stream TorramEventResponse);
+
+  // Sends a Bitcoin transaction update back to Torram.
+  rpc SubmitBitcoinTransaction(BitcoinTransactionRequest) returns (TransactionResponse);
+}
+
+// Request to stream events from Torram.
+message StreamEventsRequest {
+  string filter = 1; // Event filter (e.g., "tx.height > 0").
+}
+
+// Response containing Torram event data.
+message TorramEventResponse {
+  string event_id = 1;       // Unique event ID.
+  string event_type = 2;     // Type of the event (e.g., "transfer").
+  bytes payload = 3;         // Serialized payload (JSON or binary).
+}
+
+// Request to submit a Bitcoin transaction to Torram.
+message BitcoinTransactionRequest {
+  string tx_id = 1;          // Bitcoin transaction ID.
+  string recipient = 2;      // Recipient address in Torram.
+  double amount = 3;         // Amount transferred in BTC.
+  string timestamp = 4;      // Timestamp of the transaction.
+}
+
+// Generic response for transaction submission.
+message TransactionResponse {
+  bool success = 1;          // Whether the transaction was successful.
+  string message = 2;        // Error or success message.
+}
