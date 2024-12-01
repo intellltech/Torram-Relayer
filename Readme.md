@@ -16,7 +16,7 @@ A relayer for connecting the Torram Chain and Bitcoin, designed to forward event
 - `proto/`: Protocol Buffers definitions.
 - `cmd/`: All commands for Relayer modul
 es.
-- `test/`: Test relayer functionality between Torram-Chain and Bitcoin node.
+- `tests/`: Test relayer functionality between Torram-Chain and Bitcoin node.
 - `config/`: Configuration files (e.g., `config.toml`).
 - `scripts/`: Utility scripts.
 - `Makefile`: Makefile for building and running the project.
