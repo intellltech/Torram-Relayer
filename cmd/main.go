@@ -3,17 +3,24 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/TopDev113/torram-relayer/cmd/cmd"
+	"github.com/spf13/cobra"
 )
 
-// TODO: init log
-
 func main() {
-	// params.SetAddressPrefixes()
+	// Create the root command
+	rootCmd := &cobra.Command{
+		Use:   "relayer",
+		Short: "Relayer for Torram and Bitcoin networks",
+	}
 
-	// rootCmd := cmd.NewRootCmd()
+	// Add submitter command
+	rootCmd.AddCommand(cmd.GetSubmitterCmd())
 
+	// Execute the root command
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Print(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }

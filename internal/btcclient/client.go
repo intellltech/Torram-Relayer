@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/babylonlabs-io/vigilante/config"
+	"github.com/TopDev113/torram-relayer/config"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"

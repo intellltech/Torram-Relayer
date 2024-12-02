@@ -10,10 +10,7 @@ func NewRootCmd() *cobra.Command {
 		Short: "Babylon vigilante",
 	}
 	rootCmd.AddCommand(
-		GetReporterCmd(),
 		GetSubmitterCmd(),
-		GetMonitorCmd(),
-		GetBTCStakingTracker(),
 	)
 
 	return rootCmd

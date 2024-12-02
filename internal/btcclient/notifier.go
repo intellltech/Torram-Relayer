@@ -5,6 +5,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/TopDev113/torram-relayer/config"
 	"github.com/babylonlabs-io/vigilante/netparams"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcwallet/chain"

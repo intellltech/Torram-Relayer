@@ -3,6 +3,7 @@ package btcclient
 import (
 	"fmt"
 
+	"github.com/TopDev113/torram-relayer/config"
 	"github.com/babylonlabs-io/vigilante/netparams"
 	notifier "github.com/lightningnetwork/lnd/chainntnfs"
 

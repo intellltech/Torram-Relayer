@@ -6,61 +6,55 @@ import (
 	"os"
 	"path/filepath"
 
-	bbncfg "github.com/babylonlabs-io/babylon/client/config"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 const (
-	defaultConfigFilename = "vigilante.yml"
+	defaultConfigFilename = "torram-relayer.yml"
 	defaultDataDirname    = "data"
 )
 
 var (
-	defaultAppDataDir  = btcutil.AppDataDir("babylon-vigilante", false)
+	defaultAppDataDir  = btcutil.AppDataDir("torram-relayer", false)
 	defaultConfigFile  = filepath.Join(defaultAppDataDir, defaultConfigFilename)
 	defaultRPCKeyFile  = filepath.Join(defaultAppDataDir, "rpc.key")
 	defaultRPCCertFile = filepath.Join(defaultAppDataDir, "rpc.cert")
 )
 
+// DataDir returns the path to the data directory based on the provided home path.
 func DataDir(homePath string) string {
 	return filepath.Join(homePath, defaultDataDirname)
 }
 
-// Config defines the server's top level configuration
+// Config defines the top-level configuration for the Torram Relayer.
 type Config struct {
-	Common            CommonConfig            `mapstructure:"common"`
-	BTC               BTCConfig               `mapstructure:"btc"`
-	Babylon           bbncfg.BabylonConfig    `mapstructure:"babylon"`
-	GRPC              GRPCConfig              `mapstructure:"grpc"`
-	GRPCWeb           GRPCWebConfig           `mapstructure:"grpc-web"`
-	Metrics           MetricsConfig           `mapstructure:"metrics"`
-	Submitter         SubmitterConfig         `mapstructure:"submitter"`
-	Reporter          ReporterConfig          `mapstructure:"reporter"`
-	Monitor           MonitorConfig           `mapstructure:"monitor"`
-	BTCStakingTracker BTCStakingTrackerConfig `mapstructure:"btcstaking-tracker"`
+	Common    CommonConfig    `mapstructure:"common"`
+	BTC       BTCConfig       `mapstructure:"btc"`
+	GRPC      GRPCConfig      `mapstructure:"grpc"`
+	GRPCWeb   GRPCWebConfig   `mapstructure:"grpc-web"`
+	Metrics   MetricsConfig   `mapstructure:"metrics"`
+	Submitter SubmitterConfig `mapstructure:"submitter"`
+	Reporter  ReporterConfig  `mapstructure:"reporter"`
 }
 
+// Validate checks the configuration for any invalid or missing values.
 func (cfg *Config) Validate() error {
 	if err := cfg.Common.Validate(); err != nil {
 		return fmt.Errorf("invalid config in common: %w", err)
 	}
 
 	if err := cfg.BTC.Validate(); err != nil {
-		return fmt.Errorf("invalid config in btc: %w", err)
-	}
-
-	if err := cfg.Babylon.Validate(); err != nil {
-		return fmt.Errorf("invalid config in babylon: %w", err)
+		return fmt.Errorf("invalid config in BTC: %w", err)
 	}
 
 	if err := cfg.GRPC.Validate(); err != nil {
-		return fmt.Errorf("invalid config in grpc: %w", err)
+		return fmt.Errorf("invalid config in GRPC: %w", err)
 	}
 
 	if err := cfg.GRPCWeb.Validate(); err != nil {
-		return fmt.Errorf("invalid config in grpc-web: %w", err)
+		return fmt.Errorf("invalid config in GRPC-Web: %w", err)
 	}
 
 	if err := cfg.Metrics.Validate(); err != nil {
@@ -75,53 +69,43 @@ func (cfg *Config) Validate() error {
 		return fmt.Errorf("invalid config in reporter: %w", err)
 	}
 
-	if err := cfg.Monitor.Validate(); err != nil {
-		return fmt.Errorf("invalid config in monitor: %w", err)
-	}
-
-	if err := cfg.BTCStakingTracker.Validate(); err != nil {
-		return fmt.Errorf("invalid config in BTC staking tracker: %w", err)
-	}
-
 	return nil
 }
 
+// CreateLogger initializes and returns a logger using the common configuration.
 func (cfg *Config) CreateLogger() (*zap.Logger, error) {
 	return cfg.Common.CreateLogger()
 }
 
+// DefaultConfigFile returns the default configuration file path.
 func DefaultConfigFile() string {
 	return defaultConfigFile
 }
 
-// DefaultConfig returns server's default configuration.
+// DefaultConfig returns the default configuration for the Torram Relayer.
 func DefaultConfig() *Config {
 	return &Config{
-		Common:            DefaultCommonConfig(),
-		BTC:               DefaultBTCConfig(),
-		Babylon:           bbncfg.DefaultBabylonConfig(),
-		GRPC:              DefaultGRPCConfig(),
-		GRPCWeb:           DefaultGRPCWebConfig(),
-		Metrics:           DefaultMetricsConfig(),
-		Submitter:         DefaultSubmitterConfig(),
-		Reporter:          DefaultReporterConfig(),
-		Monitor:           DefaultMonitorConfig(),
-		BTCStakingTracker: DefaultBTCStakingTrackerConfig(),
+		Common:    DefaultCommonConfig(),
+		BTC:       DefaultBTCConfig(),
+		GRPC:      DefaultGRPCConfig(),
+		GRPCWeb:   DefaultGRPCWebConfig(),
+		Metrics:   DefaultMetricsConfig(),
+		Submitter: DefaultSubmitterConfig(),
+		Reporter:  DefaultReporterConfig(),
 	}
 }
 
-// New returns a fully parsed Config object from a given file directory
+// New loads and parses the configuration from the specified file.
 func New(configFile string) (Config, error) {
 	if _, err := os.Stat(configFile); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			// The given config file does not exist
+			// The specified config file does not exist.
 			return Config{}, fmt.Errorf("no config file found at %s", configFile)
 		}
-		// Other errors
-		return Config{}, err
+		return Config{}, err // Other file access errors.
 	}
 
-	// File exists, so parse it
+	// Parse the configuration file.
 	viper.SetConfigFile(configFile)
 	if err := viper.ReadInConfig(); err != nil {
 		return Config{}, err

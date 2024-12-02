@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/babylonlabs-io/vigilante/types"
 	"github.com/lightningnetwork/lnd/lnwallet/chainfee"
 )
 
@@ -31,10 +30,6 @@ type BTCConfig struct {
 func (cfg *BTCConfig) Validate() error {
 	if cfg.ReconnectAttempts < 0 {
 		return errors.New("reconnect-attempts must be non-negative")
-	}
-
-	if _, ok := types.GetValidNetParams()[cfg.NetParams]; !ok {
-		return errors.New("invalid net params")
 	}
 
 	// TODO: implement regex validation for zmq endpoint
@@ -105,7 +100,6 @@ func DefaultBTCConfig() BTCConfig {
 		DefaultFee:        chainfee.SatPerKVByte(1 * 1000),  // 1,000sat/kvb = 1sat/vbyte
 		EstimateMode:      DefaultBtcNodeEstimateMode,
 		TargetBlockNum:    1,
-		NetParams:         types.BtcSimnet.String(),
 		Username:          DefaultBtcNodeRPCUser,
 		Password:          DefaultBtcNodeRPCPass,
 		ReconnectAttempts: 3,

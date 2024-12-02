@@ -2,56 +2,91 @@ package config
 
 import (
 	"errors"
-
-	"github.com/babylonlabs-io/vigilante/types"
+	"time"
 )
 
 const (
-	DefaultCheckpointCacheMaxEntries = 100
-	DefaultPollingIntervalSeconds    = 60   // in seconds
-	DefaultResendIntervalSeconds     = 1800 // 30 minutes
-	DefaultResubmitFeeMultiplier     = 1
+	// Default values for Submitter configuration
+	DefaultBufferSize             = 100  // Number of entries in the buffer
+	DefaultResubmitFeeMultiplier  = 1.0  // Multiplier for bumped fees
+	DefaultPollingIntervalSeconds = 60   // Polling interval (in seconds)
+	DefaultResendIntervalSeconds  = 1800 // Resend interval (30 minutes)
 )
 
-// SubmitterConfig defines configuration for the gRPC-web server.
+// SubmitterConfig defines the configuration for the Submitter component.
 type SubmitterConfig struct {
-	// NetParams defines the BTC network params, which should be mainnet|testnet|simnet|signet
-	NetParams string `mapstructure:"netparams"`
-	// BufferSize defines the number of raw checkpoints stored in the buffer
+	// NetworkParams defines the Bitcoin network parameters (e.g., mainnet, testnet, simnet, signet).
+	NetworkParams string `mapstructure:"network-params"`
+	// BufferSize specifies the maximum number of raw checkpoints stored in memory.
 	BufferSize uint `mapstructure:"buffer-size"`
-	// ResubmitFeeMultiplier is used to multiply the estimated bumped fee in resubmission
+	// ResubmitFeeMultiplier is a factor to calculate fee increases for resubmissions.
 	ResubmitFeeMultiplier float64 `mapstructure:"resubmit-fee-multiplier"`
-	// PollingIntervalSeconds defines the intervals (in seconds) between each polling of Babylon checkpoints
-	PollingIntervalSeconds int64 `mapstructure:"polling-interval-seconds"`
-	// ResendIntervalSeconds defines the time (in seconds) which the submitter awaits
-	// before resubmitting checkpoints to BTC
-	ResendIntervalSeconds uint `mapstructure:"resend-interval-seconds"`
-	// DatabaseConfig stores last submitted txn
-	DatabaseConfig *DBConfig `mapstructure:"dbconfig"`
+	// PollingInterval defines how often (in seconds) Torram messages are checked.
+	PollingInterval time.Duration `mapstructure:"polling-interval"`
+	// ResendInterval specifies the delay (in seconds) before resubmitting to Bitcoin.
+	ResendInterval time.Duration `mapstructure:"resend-interval"`
+	// DatabaseConfig holds the configuration for the database backend used by the Submitter.
+	DatabaseConfig *DBConfig `mapstructure:"database-config"`
 }
 
+// Validate checks the integrity of SubmitterConfig values.
 func (cfg *SubmitterConfig) Validate() error {
-	if _, ok := types.GetValidNetParams()[cfg.NetParams]; !ok {
-		return errors.New("invalid net params")
+	// Validate NetworkParams
+	if !isValidNetworkParam(cfg.NetworkParams) {
+		return errors.New("invalid network-params, must be one of: mainnet, testnet, simnet, signet")
 	}
 
-	if cfg.ResubmitFeeMultiplier < 1 {
-		return errors.New("invalid resubmit-fee-multiplier, should not be less than 1")
+	// Validate BufferSize
+	if cfg.BufferSize == 0 {
+		return errors.New("buffer-size must be greater than 0")
 	}
 
-	if cfg.PollingIntervalSeconds < 0 {
-		return errors.New("invalid polling-interval-seconds, should be positive")
+	// Validate ResubmitFeeMultiplier
+	if cfg.ResubmitFeeMultiplier < 1.0 {
+		return errors.New("resubmit-fee-multiplier must be at least 1.0")
+	}
+
+	// Validate PollingInterval
+	if cfg.PollingInterval <= 0 {
+		return errors.New("polling-interval must be greater than 0 seconds")
+	}
+
+	// Validate ResendInterval
+	if cfg.ResendInterval <= 0 {
+		return errors.New("resend-interval must be greater than 0 seconds")
+	}
+
+	// Validate DatabaseConfig
+	if cfg.DatabaseConfig == nil {
+		return errors.New("database-config cannot be nil")
+	}
+
+	if err := cfg.DatabaseConfig.Validate(); err != nil {
+		return err
 	}
 
 	return nil
 }
 
+// DefaultSubmitterConfig provides a default configuration for the Submitter.
 func DefaultSubmitterConfig() SubmitterConfig {
 	return SubmitterConfig{
-		NetParams:              types.BtcSimnet.String(),
-		BufferSize:             DefaultCheckpointCacheMaxEntries,
-		ResubmitFeeMultiplier:  DefaultResubmitFeeMultiplier,
-		PollingIntervalSeconds: DefaultPollingIntervalSeconds,
-		ResendIntervalSeconds:  DefaultResendIntervalSeconds,
+		NetworkParams:         "simnet", // Default to Bitcoin Simnet
+		BufferSize:            DefaultBufferSize,
+		ResubmitFeeMultiplier: DefaultResubmitFeeMultiplier,
+		PollingInterval:       time.Second * DefaultPollingIntervalSeconds,
+		ResendInterval:        time.Second * DefaultResendIntervalSeconds,
+		DatabaseConfig:        DefaultDBConfig(),
 	}
+}
+
+// isValidNetworkParam checks if a given Bitcoin network parameter is valid.
+func isValidNetworkParam(param string) bool {
+	validParams := []string{"mainnet", "testnet", "simnet", "signet"}
+	for _, p := range validParams {
+		if p == param {
+			return true
+		}
+	}
+	return false
 }

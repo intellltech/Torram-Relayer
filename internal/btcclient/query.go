@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/avast/retry-go/v4"
+	"github.com/babylonlabs-io/vigilante/types"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"

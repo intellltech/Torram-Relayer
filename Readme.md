@@ -14,8 +14,7 @@ A relayer for connecting the Torram Chain and Bitcoin, designed to forward event
   - `torram/`: Torram client code.
   - `submitter/`: submitter relayer functionality.
 - `proto/`: Protocol Buffers definitions.
-- `cmd/`: All commands for Relayer modul
-es.
+- `cmd/`: All commands for Relayer modules.
 - `tests/`: Test relayer functionality between Torram-Chain and Bitcoin node.
 - `config/`: Configuration files (e.g., `config.toml`).
 - `scripts/`: Utility scripts.
