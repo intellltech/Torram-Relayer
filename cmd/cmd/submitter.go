@@ -38,7 +38,7 @@ func GetSubmitterCmd() *cobra.Command {
 			// Initialize Bitcoin client.
 			btcClient, err := btcclient.NewWallet(&cfg, logger)
 			if err != nil {
-				logger.Error("Failed to initialize Bitcoin client", "error", err)
+				logger.Error("Failed to initialize Bitcoin client", err)
 				os.Exit(1)
 			}
 			logger.Info("Bitcoin client initialized")
